@@ -288,9 +288,13 @@ check_struct_has_member("struct rusage" ru_idrss sys/resource.h HAVE_RU_IDRSS)
 # GMP
 # check_function_exists(gmp_randinit_mt HAVE_GMP_RANDINIT_MT)
 # Requires <gmp.h> as this is a macro
-check_c_source_compiles(
-    "#include <gmp.h>\nint main() { gmp_randinit_mt(0); return 0;}"
-    HAVE_GMP_RANDINIT_MT)
+if(HAVE_GMP AND USE_GMP)
+  check_c_source_compiles(
+      "#include <gmp.h>\nint main() { gmp_randinit_mt(0); return 0;}"
+      HAVE_GMP_RANDINIT_MT)
+else()
+   set(HAVE_GMP_RANDINIT_MT 0)
+endif()
 
 if(HAVE_QSORT_R)
   include(TestGNUQsortR)
