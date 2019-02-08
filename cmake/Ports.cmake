@@ -78,9 +78,15 @@ if(CMAKE_CROSSCOMPILING)
       set(SWIPL_NATIVE_FRIEND_DIR ${CMAKE_SOURCE_DIR}/${SWIPL_NATIVE_FRIEND})
     endif()
 
-    set(PROG_SWIPL
-	${SWIPL_NATIVE_FRIEND_DIR}/src/swipl${CMAKE_HOST_EXECUTABLE_SUFFIX}
-	CACHE STRING "SWI-Prolog executable to perform build tasks")
+    if(CMAKE_HOST_EXECUTABLE_SUFFIX STREQUAL ".js")
+        set(PROG_SWIPL
+            node ${SWIPL_NATIVE_FRIEND_DIR}/src/swipl${CMAKE_HOST_EXECUTABLE_SUFFIX}
+            CACHE STRING "SWI-Prolog executable to perform build tasks")
+    else()
+        set(PROG_SWIPL
+            ${SWIPL_NATIVE_FRIEND_DIR}/src/swipl${CMAKE_HOST_EXECUTABLE_SUFFIX}
+            CACHE STRING "SWI-Prolog executable to perform build tasks")
+    endif()
 
     swipl_address_bits(${PROG_SWIPL} SWIPL_NATIVE_BITS)
     math(EXPR sizeof_void_bits "${CMAKE_SIZEOF_VOID_P} * 8")
@@ -90,16 +96,31 @@ if(CMAKE_CROSSCOMPILING)
       set(PROG_SWIPL_FOR_BOOT ${PROG_SWIPL})
     else()
       message("-- Cannot use ${PROG_SWIPL} for compiling boot state")
-      set(PROG_SWIPL_FOR_BOOT $<TARGET_FILE:swipl>)
+      if(CMAKE_EXECUTABLE_SUFFIX STREQUAL ".js")
+        set(PROG_SWIPL_FOR_BOOT node $<TARGET_FILE:swipl>)
+      else()
+        set(PROG_SWIPL_FOR_BOOT $<TARGET_FILE:swipl>)
+      endif()
     endif()
   else()
-    set(PROG_SWIPL $<TARGET_FILE:swipl>
-	CACHE STRING "SWI-Prolog executable to perform build tasks")
+    if(CMAKE_EXECUTABLE_SUFFIX STREQUAL ".js")
+      set(PROG_SWIPL node $<TARGET_FILE:swipl>
+          CACHE STRING "SWI-Prolog executable to perform build tasks")
+    else()
+      set(PROG_SWIPL $<TARGET_FILE:swipl>
+          CACHE STRING "SWI-Prolog executable to perform build tasks")
+    endif()
     set(PROG_SWIPL_FOR_BOOT ${PROG_SWIPL})
   endif()
 else(CMAKE_CROSSCOMPILING)
   set(CMAKE_HOST_EXECUTABLE_SUFFIX ${CMAKE_EXECUTABLE_SUFFIX})
-  set(PROG_SWIPL $<TARGET_FILE:swipl>)
+  
+  if(CMAKE_EXECUTABLE_SUFFIX STREQUAL ".js")
+    set(PROG_SWIPL node $<TARGET_FILE:swipl>)
+  else()
+    set(PROG_SWIPL $<TARGET_FILE:swipl>)
+  endif()
+
   set(PROG_SWIPL_FOR_BOOT ${PROG_SWIPL})
 endif(CMAKE_CROSSCOMPILING)
 
